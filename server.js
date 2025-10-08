@@ -219,6 +219,74 @@ app.post('/api/resenias', async (req, res) => {
   }
 });
 
+app.put('/api/resenias/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { juegoId, puntuacion, textoReseña, horasJugadas, dificultad, recomendaria } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID no válido" });
+    }
+
+    const reseniaActualizada = await Resenia.findByIdAndUpdate(
+      id,
+      { juegoId, puntuacion, textoReseña, horasJugadas, dificultad, recomendaria },
+      { new: true, runValidators: true }
+    );
+
+    if (!reseniaActualizada) {
+      return res.status(404).json({ error: "Reseña no encontrada" });
+    }
+
+    res.json({
+      mensaje: 'Reseña actualizada exitosamente',
+      resenia: reseniaActualizada
+    });
+  } catch (error) {
+    console.error("Error al actualizar reseña:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+app.delete('/api/resenias/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID no válido" });
+    }
+
+    const reseniaEliminada = await Resenia.findByIdAndDelete(id);
+
+    if (!reseniaEliminada) {
+      return res.status(404).json({ error: "Reseña no encontrada" });
+    }
+
+    res.json({
+      mensaje: "Reseña eliminada exitosamente",
+      resenia: {
+        id: reseniaEliminada._id,
+        juegoId: reseniaEliminada.juegoId,
+        puntuacion: reseniaEliminada.puntuacion
+      }
+    });
+  } catch (error) {
+    console.error("Error eliminando reseña:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+app.use((error, req, res, next) => {
+  if (error.name === "ValidationError") {
+    const mensaje = Object.values(error.errors).map(err => err.message);
+    return res.status(400).json({ error: "Error de validación", mensajes: mensaje });
+  }
+  if (error.code === 11000) {
+    return res.status(400).json({ error: "Dato duplicado" });
+  }
+  res.status(500).json({ error: "Error interno del servidor" });
+});
+
 app.listen(3000, () => {
   console.log('API GameTracker en http://localhost:3000');
 });
