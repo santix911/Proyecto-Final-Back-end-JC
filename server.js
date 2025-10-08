@@ -180,6 +180,45 @@ app.get('/api/resenias/juego/:juegoId', async (req, res) => {
   }
 });
 
+app.post('/api/resenias', async (req, res) => {
+  try {
+    const { juegoId, puntuacion, textoReseña, horasJugadas, dificultad, recomendaria } = req.body;
+
+    if (!juegoId || !puntuacion || !textoReseña) {
+      return res.status(400).json({
+        error: "Faltan datos de la reseña. Se requiere juegoId, puntuación y texto"
+      });
+    }
+
+    const juegoExiste = await Juego.findById(juegoId);
+    if (!juegoExiste) {
+      return res.status(404).json({ error: "El juego especificado no existe" });
+    }
+
+    const nuevaResenia = new Resenia({
+      juegoId,
+      puntuacion,
+      textoReseña,
+      horasJugadas,
+      dificultad,
+      recomendaria
+    });
+
+    const reseniaGuardada = await nuevaResenia.save();
+
+    res.status(201).json({
+      mensaje: "Reseña guardada con éxito",
+      resenia: reseniaGuardada
+    });
+  } catch (error) {
+    console.error("Error al guardar la reseña:", error.message);
+    res.status(400).json({
+      error: "Error al guardar la reseña",
+      mensaje: error.message
+    });
+  }
+});
+
 app.listen(3000, () => {
   console.log('API GameTracker en http://localhost:3000');
 });
