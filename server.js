@@ -93,6 +93,67 @@ app.post('/api/juegos', async (req, res) => {
   }
 });
 
+app.put('/api/juegos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { titulo, genero, plataforma, añoLanzamiento, desarrollador, imagenPortada, descripcion, completado } = req.body;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID no válido" });
+    }
+
+    const juegoActualizado = await Juego.findByIdAndUpdate(
+      id,
+      { titulo, genero, plataforma, añoLanzamiento, desarrollador, imagenPortada, descripcion, completado },
+      { new: true, runValidators: true }
+    );
+
+    if (!juegoActualizado) {
+      return res.status(404).json({ error: "Juego no encontrado" });
+    }
+
+    res.json({
+      mensaje: 'Información del juego actualizada exitosamente',
+      juego: juegoActualizado
+    });
+  } catch (error) {
+    console.error("Error al actualizar juego:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+app.delete('/api/juegos/:id', async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ error: "ID no válido" });
+    }
+
+    const juegoEliminado = await Juego.findByIdAndDelete(id);
+
+    if (!juegoEliminado) {
+      return res.status(404).json({ error: "Juego no encontrado" });
+    }
+
+    await Resenia.deleteMany({ juegoId: id });
+
+    const juegosRestantes = await Juego.countDocuments();
+
+    res.json({
+      mensaje: "Juego removido de tu biblioteca",
+      juego: {
+        id: juegoEliminado._id,
+        titulo: juegoEliminado.titulo
+      },
+      juegosRestantes: juegosRestantes
+    });
+  } catch (error) {
+    console.error("Error eliminando juego:", error);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
 app.listen(3000, () => {
   console.log('API GameTracker en http://localhost:3000');
 });
