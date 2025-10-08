@@ -154,6 +154,32 @@ app.delete('/api/juegos/:id', async (req, res) => {
   }
 });
 
+app.get('/api/resenias', async (req, res) => {
+  try {
+    const resenias = await Resenia.find().populate('juegoId');
+    res.json(resenias);
+  } catch (error) {
+    console.error("Error al obtener reseñas:", error.message);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
+app.get('/api/resenias/juego/:juegoId', async (req, res) => {
+  try {
+    const { juegoId } = req.params;
+
+    if (!mongoose.Types.ObjectId.isValid(juegoId)) {
+      return res.status(400).json({ error: "ID de juego no válido" });
+    }
+
+    const resenias = await Resenia.find({ juegoId }).populate('juegoId');
+    res.json(resenias);
+  } catch (error) {
+    console.error("Error al obtener reseñas:", error.message);
+    res.status(500).json({ error: "Error interno del servidor" });
+  }
+});
+
 app.listen(3000, () => {
   console.log('API GameTracker en http://localhost:3000');
 });
