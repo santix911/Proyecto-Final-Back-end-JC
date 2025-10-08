@@ -57,6 +57,42 @@ app.get('/api/juegos/:id', async (req, res) => {
   }
 });
 
+app.post('/api/juegos', async (req, res) => {
+  try {
+    const { titulo, genero, plataforma, añoLanzamiento, desarrollador, imagenPortada, descripcion, completado } = req.body;
+
+    if (!titulo || !genero || !plataforma) {
+      return res.status(400).json({
+        error: "Faltan datos del juego. Se requiere título, género y plataforma"
+      });
+    }
+
+    const nuevoJuego = new Juego({
+      titulo,
+      genero,
+      plataforma,
+      añoLanzamiento,
+      desarrollador,
+      imagenPortada,
+      descripcion,
+      completado
+    });
+
+    const juegoGuardado = await nuevoJuego.save();
+
+    res.status(201).json({
+      mensaje: "Juego agregado a tu colección",
+      juego: juegoGuardado
+    });
+  } catch (error) {
+    console.error("Error al guardar el juego:", error.message);
+    res.status(400).json({
+      error: "Error al guardar el juego",
+      mensaje: error.message
+    });
+  }
+});
+
 app.listen(3000, () => {
   console.log('API GameTracker en http://localhost:3000');
 });
