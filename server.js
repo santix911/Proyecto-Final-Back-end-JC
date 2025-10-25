@@ -1,6 +1,11 @@
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
+const cors = require('cors');
+
+const PORT = process.env.PORT || 3001;
+
+app.use(cors());
 
 app.use(express.json());
 
@@ -287,6 +292,6 @@ app.use((error, req, res, next) => {
   res.status(500).json({ error: "Error interno del servidor" });
 });
 
-app.listen(3000, () => {
-  console.log('API GameTracker en http://localhost:3000');
+app.listen(PORT, () => {
+  console.log(`API GameTracker en http://localhost:${PORT}`);
 });
