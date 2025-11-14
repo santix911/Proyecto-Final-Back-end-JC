@@ -1,3 +1,5 @@
+require('dotenv').config();
+
 const express = require('express');
 const app = express();
 const mongoose = require('mongoose');
@@ -9,8 +11,7 @@ app.use(cors());
 
 app.use(express.json());
 
-//const mongooseURI = "mongodb+srv://ProyectoPrueba:stHfUtQDM7sIpFJL@prueba.ukjmu8h.mongodb.net/?retryWrites=true&w=majority&appName=Prueba";
-const mongooseURI = "mongodb+srv://jacobogarcesoquendo:aFJzVMGN3o7fA38A@cluster0.mqwbn.mongodb.net/SantiagoCevedaSanchez"
+const mongooseURI = process.env.MONGODB_URI;
 
 const connectDB = async () => {
   try {
